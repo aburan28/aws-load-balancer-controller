@@ -18,13 +18,34 @@ func (t *defaultModelBuildTask) buildListeners(ctx context.Context, scheme elbv2
 	if err != nil {
 		return err
 	}
+	portMap := make(map[int32][]corev1.ServicePort)
 
 	for _, port := range t.service.Spec.Ports {
-		_, err := t.buildListener(ctx, port, *cfg, scheme)
-		if err != nil {
-			return err
+		key := port.Port
+		if vals, exists := portMap[key]; exists {
+			portMap[key] = append(vals, port)
+		} else {
+			portMap[key] = []corev1.ServicePort{port}
+		}
+
+	}
+
+	for _, port := range t.service.Spec.Ports {
+		key := port.Port
+		if vals, exists := portMap[key]; exists {
+			if len(vals) > 1 {
+				port = mergeServicePorts(vals)
+			} else {
+				port = vals[0]
+			}
+			_, err := t.buildListener(ctx, port, *cfg, scheme)
+			if err != nil {
+				return err
+			}
+			delete(portMap, key)
 		}
 	}
+
 	return nil
 }
 

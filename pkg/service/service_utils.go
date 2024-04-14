@@ -75,3 +75,27 @@ func (u *defaultServiceUtils) checkAWSLoadBalancerTypeAnnotation(service *corev1
 	}
 	return false
 }
+
+func mergeServicePorts(ports []corev1.ServicePort) corev1.ServicePort {
+	port0 := ports[0]
+	mergeProtocols := map[corev1.Protocol]bool{
+		corev1.ProtocolTCP: true,
+		corev1.ProtocolUDP: true,
+	}
+
+	if _, ok := mergeProtocols[port0.Protocol]; !ok {
+		return port0
+	}
+
+	for _, port := range ports[1:] {
+		if _, ok := mergeProtocols[port.Protocol]; !ok {
+			continue
+		}
+		if port.NodePort == port0.NodePort && port.Protocol != port0.Protocol {
+			port0.Protocol = corev1.Protocol("TCP_UDP")
+			break
+		}
+	}
+	return port0
+
+}

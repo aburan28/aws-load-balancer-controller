@@ -121,6 +121,668 @@ func Test_defaultModelBuilderTask_Build(t *testing.T) {
 		wantNumResources             int
 		featureGates                 map[config.Feature]bool
 	}{
+		//    {
+		// 		testName: "IP mode, TCP/UDP same port syslog",
+		// 		svc: &corev1.Service{
+		// 			ObjectMeta: metav1.ObjectMeta{
+		// 				Name:      "tcpudp-protocol",
+		// 				Namespace: "app",
+		// 				Annotations: map[string]string{
+		// 					"service.beta.kubernetes.io/aws-load-balancer-type":            "external",
+		// 					"service.beta.kubernetes.io/aws-load-balancer-scheme":          "internet-facing",
+		// 					"service.beta.kubernetes.io/aws-load-balancer-nlb-target-type": "ip",
+		// 				},
+		// 				UID: "2dc098f2-ae33-4378-af7b-83e2a0424495",
+		// 			},
+		//          Spec: corev1.ServiceSpec{
+		// 				Type:                  corev1.ServiceTypeClusterIP,
+		// 				Selector:              map[string]string{"app": "syslog"},
+		// 				Ports: []corev1.ServicePort{
+		// 					{
+		// 						Name:       "p1",
+		// 						Port:       514,
+		// 						TargetPort: intstr.FromInt(514),
+		// 						Protocol:   corev1.ProtocolTCP,
+		// 					},
+		// 					{
+		// 						Name:       "p2",
+		// 						Port:       514,
+		// 						TargetPort: intstr.FromInt(514),
+		// 						Protocol:   corev1.ProtocolUDP,
+		// 					},
+		// 					{
+		// 						Name:       "alt2",
+		// 						Port:       83,
+		// 						TargetPort: intstr.FromInt(8883),
+		// 						Protocol:   corev1.ProtocolTCP,
+		// 					},
+		// 				},
+		// 			},
+		//          resolveViaDiscoveryCalls: []resolveViaDiscoveryCall{resolveViaDiscoveryCallForThreeSubnet},
+		//          listLoadBalancerCalls:    []listLoadBalancerCall{listLoadBalancerCallForEmptyLB},
+		//          wantError:                false,
+		//          wantValue: `
+
+		//          {
+		//             "id":"app/tcpudp-protocol",
+		//             "resources":{
+		//                "AWS::ElasticLoadBalancingV2::Listener":{
+		//                   "514":{
+		//                      "spec":{
+		//                         "loadBalancerARN":{
+		//                            "$ref":"#/resources/AWS::ElasticLoadBalancingV2::LoadBalancer/LoadBalancer/status/loadBalancerARN"
+		//                         },
+		//                         "port":514,
+		//                         "protocol":"TCP_UDP",
+		//                         "defaultActions":[
+		//                            {
+		//                               "type":"forward",
+		//                               "forwardConfig":{
+		//                                  "targetGroups":[
+		//                                     {
+		//                                        "targetGroupARN":{
+		//                                           "$ref":"#/resources/AWS::ElasticLoadBalancingV2::TargetGroup/app/tcpudp-protocol:80/status/targetGroupARN"
+		//                                        }
+		//                                     }
+		//                                  ]
+		//                               }
+		//                            }
+		//                         ]
+		//                      }
+		//                   },
+		//                   "83":{
+		//                      "spec":{
+		//                         "loadBalancerARN":{
+		//                            "$ref":"#/resources/AWS::ElasticLoadBalancingV2::LoadBalancer/LoadBalancer/status/loadBalancerARN"
+		//                         },
+		//                         "port":83,
+		//                         "protocol":"TCP",
+		//                         "defaultActions":[
+		//                            {
+		//                               "type":"forward",
+		//                               "forwardConfig":{
+		//                                  "targetGroups":[
+		//                                     {
+		//                                        "targetGroupARN":{
+		//                                           "$ref":"#/resources/AWS::ElasticLoadBalancingV2::TargetGroup/app/tcpudp-protocol:83/status/targetGroupARN"
+		//                                        }
+		//                                     }
+		//                                  ]
+		//                               }
+		//                            }
+		//                         ]
+		//                      }
+		//                   }
+		//                },
+		//                "AWS::ElasticLoadBalancingV2::LoadBalancer":{
+		//                   "LoadBalancer":{
+		//                      "spec":{
+		//                         "name":"k8s-app-tcpudppr-2af705447d",
+		//                         "type":"network",
+		//                         "scheme":"internet-facing",
+		//                         "ipAddressType":"ipv4",
+		//                         "subnetMapping":[
+		//                            {
+		//                               "subnetID":"subnet-1"
+		//                            },
+		//                            {
+		//                               "subnetID":"subnet-2"
+		//                            },
+		//                            {
+		//                               "subnetID":"subnet-3"
+		//                            }
+		//                         ]
+		//                      }
+		//                   }
+		//                },
+		//                "AWS::ElasticLoadBalancingV2::TargetGroup":{
+		//                   "app/tcpudp-protocol:80":{
+		//                      "spec":{
+		//                         "ipAddressType":"ipv4",
+		//                         "name":"k8s-app-tcpudppr-2213a0d759",
+		//                         "targetType":"ip",
+		//                         "port":514,
+		//                         "protocol":"TCP_UDP",
+		//                         "healthCheckConfig":{
+		//                            "port":"traffic-port",
+		//                            "protocol":"TCP",
+		//                            "unhealthyThresholdCount":3,
+		//                            "healthyThresholdCount":3,
+		//                            "intervalSeconds":10
+		//                         },
+		//                         "targetGroupAttributes":[
+		//                            {
+		//                               "key":"proxy_protocol_v2.enabled",
+		//                               "value":"false"
+		//                            }
+		//                         ]
+		//                      }
+		//                   },
+		//                   "app/tcpudp-protocol:83":{
+		//                      "spec":{
+		//                         "ipAddressType":"ipv4",
+		//                         "name":"k8s-app-tcpudppr-c200165858",
+		//                         "targetType":"ip",
+		//                         "port":32323,
+		//                         "protocol":"TCP",
+		//                         "healthCheckConfig":{
+		//                            "port":"traffic-port",
+		//                            "protocol":"TCP",
+		//                            "unhealthyThresholdCount":3,
+		//                            "healthyThresholdCount":3,
+		//                            "intervalSeconds":10
+		//                         },
+		//                         "targetGroupAttributes":[
+		//                            {
+		//                               "key":"proxy_protocol_v2.enabled",
+		//                               "value":"false"
+		//                            }
+		//                         ]
+		//                      }
+		//                   }
+		//                },
+		//                "K8S::ElasticLoadBalancingV2::TargetGroupBinding":{
+		//                   "app/tcpudp-protocol:514":{
+		//                      "spec":{
+		//                         "template":{
+		//                            "metadata":{
+		//                               "creationTimestamp":null,
+		//                               "name":"k8s-app-tcpudppr-2213a0d759",
+		//                               "namespace":"app"
+		//                            },
+		//                            "spec":{
+		//                               "targetGroupARN":{
+		//                                  "$ref":"#/resources/AWS::ElasticLoadBalancingV2::TargetGroup/app/tcpudp-protocol:80/status/targetGroupARN"
+		//                               },
+		//                               "targetType":"instance",
+		//                               "serviceRef":{
+		//                                  "name":"tcpudp-protocol",
+		//                                  "port":514
+		//                               },
+		//                               "ipAddressType": "ipv4",
+		//                               "networking":{
+		//                                  "ingress":[
+		//                                     {
+		//                                        "from":[
+		//                                           {
+		//                                              "ipBlock":{
+		//                                                 "cidr":"0.0.0.0/0"
+		//                                              }
+		//                                           }
+		//                                        ],
+		//                                        "ports":[
+		//                                           {
+		//                                              "protocol":"TCP",
+		//                                              "port":514
+		//                                           },
+		//                                           {
+		//                                              "protocol":"UDP",
+		//                                              "port":514
+		//                                           }
+		//                                        ]
+		//                                     }
+		//                                  ]
+		//                               }
+		//                            }
+		//                         }
+		//                      }
+		//                   },
+		//                   "app/tcpudp-protocol:83":{
+		//                      "spec":{
+		//                         "template":{
+		//                            "metadata":{
+		//                               "name":"k8s-app-tcpudppr-c200165858",
+		//                               "namespace":"app",
+		//                               "creationTimestamp":null
+		//                            },
+		//                            "spec":{
+		//                               "targetGroupARN":{
+		//                                  "$ref":"#/resources/AWS::ElasticLoadBalancingV2::TargetGroup/app/tcpudp-protocol:83/status/targetGroupARN"
+		//                               },
+		//                               "targetType":"instance",
+		//                               "serviceRef":{
+		//                                  "name":"tcpudp-protocol",
+		//                                  "port":83
+		//                               },
+		//                               "ipAddressType": "ipv4",
+		//                               "networking":{
+		//                                  "ingress":[
+		//                                     {
+		//                                        "from":[
+		//                                           {
+		//                                              "ipBlock":{
+		//                                                 "cidr":"0.0.0.0/0"
+		//                                              }
+		//                                           }
+		//                                        ],
+		//                                        "ports":[
+		//                                           {
+		//                                              "protocol":"TCP",
+		//                                              "port":83
+		//                                           }
+		//                                        ]
+		//                                     }
+		//                                  ]
+		//                               }
+		//                            }
+		//                         }
+		//                      }
+		//                   }
+		//                }
+		//             }
+		//            }
+		//          `,
+		//                     wantNumResources: 7,
+		//                  },
+		//                  {
+		//                     testName: "Simple service",
+		//                     svc: &corev1.Service{
+		//                        ObjectMeta: metav1.ObjectMeta{
+		//                           Name:      "nlb-ip-svc-tls",
+		//                           Namespace: "default",
+		//                           UID:       "bdca2bd0-bfc6-449a-88a3-03451f05f18c",
+		//                           Annotations: map[string]string{
+		//                              "service.beta.kubernetes.io/aws-load-balancer-type":                                     "nlb-ip",
+		//                              "service.beta.kubernetes.io/aws-load-balancer-inbound-sg-rules-on-private-link-traffic": "on",
+		//                           },
+		//                        },
+		//                        Spec: corev1.ServiceSpec{
+		//                           Type:     corev1.ServiceTypeLoadBalancer,
+		//                           Selector: map[string]string{"app": "hello"},
+		//                           Ports: []corev1.ServicePort{
+		//                              {
+		//                                 Port:       80,
+		//                                 TargetPort: intstr.FromInt(80),
+		//                                 Protocol:   corev1.ProtocolTCP,
+		//                              },
+		//                           },
+		//                        },
+		//                     },
+		//                     resolveViaDiscoveryCalls: []resolveViaDiscoveryCall{resolveViaDiscoveryCallForOneSubnet},
+		//                     listLoadBalancerCalls:    []listLoadBalancerCall{listLoadBalancerCallForEmptyLB},
+		//                     wantError:                false,
+		//                     wantNumResources:         4,
+		//                     featureGates: map[config.Feature]bool{
+		//                        config.NLBSecurityGroup: false,
+		//                     },
+		//                     wantValue: `
+		//            {
+		//             "id":"default/nlb-ip-svc-tls",
+		//             "resources":{
+		//                "AWS::ElasticLoadBalancingV2::Listener":{
+		//                   "80":{
+		//                      "spec":{
+		//                         "loadBalancerARN":{
+		//                            "$ref":"#/resources/AWS::ElasticLoadBalancingV2::LoadBalancer/LoadBalancer/status/loadBalancerARN"
+		//                         },
+		//                         "port":80,
+		//                         "protocol":"TCP",
+		//                         "defaultActions":[
+		//                            {
+		//                               "type":"forward",
+		//                               "forwardConfig":{
+		//                                  "targetGroups":[
+		//                                     {
+		//                                        "targetGroupARN":{
+		//                                           "$ref":"#/resources/AWS::ElasticLoadBalancingV2::TargetGroup/default/nlb-ip-svc-tls:80/status/targetGroupARN"
+		//                                        }
+		//                                     }
+		//                                  ]
+		//                               }
+		//                            }
+		//                         ]
+		//                      }
+		//                   }
+		//                },
+		//                "AWS::ElasticLoadBalancingV2::LoadBalancer":{
+		//                   "LoadBalancer":{
+		//                      "spec":{
+		//                         "name":"k8s-default-nlbipsvc-6b0ba8ff70",
+		//                         "type":"network",
+		//                         "scheme":"internal",
+		//                         "securityGroupsInboundRulesOnPrivateLink":"on",
+		//                         "ipAddressType":"ipv4",
+		//                         "subnetMapping":[
+		//                            {
+		//                               "subnetID":"subnet-1"
+		//                            }
+		//                         ]
+		//                      }
+		//                   }
+		//                },
+		//                "AWS::ElasticLoadBalancingV2::TargetGroup":{
+		//                   "default/nlb-ip-svc-tls:80":{
+		//                      "spec":{
+		//                         "name":"k8s-default-nlbipsvc-d4818dcd51",
+		//                         "targetType":"ip",
+		//                         "ipAddressType":"ipv4",
+		//                         "port":80,
+		//                         "protocol":"TCP",
+		//                         "healthCheckConfig":{
+		//                            "port":"traffic-port",
+		//                            "protocol":"TCP",
+		//                            "intervalSeconds":10,
+		//                            "timeoutSeconds":10,
+		//                            "healthyThresholdCount":3,
+		//                            "unhealthyThresholdCount":3
+		//                         },
+		//                         "targetGroupAttributes":[
+		//                            {
+		//                               "key":"proxy_protocol_v2.enabled",
+		//                               "value":"false"
+		//                            }
+		//                         ]
+		//                      }
+		//                   }
+		//                },
+		//                "K8S::ElasticLoadBalancingV2::TargetGroupBinding":{
+		//                   "default/nlb-ip-svc-tls:80":{
+		//                      "spec":{
+		//                         "template":{
+		//                            "metadata":{
+		//                               "name":"k8s-default-nlbipsvc-d4818dcd51",
+		//                               "namespace":"default",
+		//                               "creationTimestamp":null
+		//                            },
+		//                            "spec":{
+		//                               "targetGroupARN":{
+		//                                  "$ref":"#/resources/AWS::ElasticLoadBalancingV2::TargetGroup/default/nlb-ip-svc-tls:80/status/targetGroupARN"
+		//                               },
+		//                               "targetType":"ip",
+		//                               "ipAddressType":"ipv4",
+		//                               "vpcID": "vpc-xxx",
+		//                               "serviceRef":{
+		//                                  "name":"nlb-ip-svc-tls",
+		//                                  "port":80
+		//                               },
+		//                               "networking":{
+		//                                  "ingress":[
+		//                                     {
+		//                                        "from":[
+		//                                           {
+		//                                              "ipBlock":{
+		//                                                 "cidr":"192.168.0.0/19"
+		//                                              }
+		//                                           }
+		//                                        ],
+		//                                        "ports":[
+		//                                           {
+		//                                              "protocol":"TCP",
+		//                                              "port":80
+		//                                           }
+		//                                        ]
+		//                                     }
+		//                                  ]
+		//                               }
+		//                            }
+		//                         }
+		//                      }
+		//                   }
+		//                }
+		//             }
+		//            }
+		// `
+
+		//    },
+		{
+			testName: "Instance mode, TCP/UDP same port test",
+			svc: &corev1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "tcpudp-protocol",
+					Namespace: "app",
+					Annotations: map[string]string{
+						"service.beta.kubernetes.io/aws-load-balancer-type":            "external",
+						"service.beta.kubernetes.io/aws-load-balancer-scheme":          "internet-facing",
+						"service.beta.kubernetes.io/aws-load-balancer-nlb-target-type": "instance",
+					},
+					UID: "2dc098f0-ae33-4378-af7b-83e2a0424495",
+				},
+				Spec: corev1.ServiceSpec{
+					ExternalTrafficPolicy: corev1.ServiceExternalTrafficPolicyTypeCluster,
+					Type:                  corev1.ServiceTypeLoadBalancer,
+					Selector:              map[string]string{"app": "hello"},
+					HealthCheckNodePort:   29123,
+					Ports: []corev1.ServicePort{
+						{
+							Name:       "p1",
+							Port:       80,
+							TargetPort: intstr.FromInt(80),
+							Protocol:   corev1.ProtocolTCP,
+							NodePort:   31223,
+						},
+						{
+							Name:       "p2",
+							Port:       80,
+							TargetPort: intstr.FromInt(80),
+							Protocol:   corev1.ProtocolUDP,
+							NodePort:   31223,
+						},
+						{
+							Name:       "alt2",
+							Port:       83,
+							TargetPort: intstr.FromInt(8883),
+							Protocol:   corev1.ProtocolTCP,
+							NodePort:   32323,
+						},
+					},
+				},
+			},
+			resolveViaDiscoveryCalls: []resolveViaDiscoveryCall{resolveViaDiscoveryCallForThreeSubnet},
+			listLoadBalancerCalls:    []listLoadBalancerCall{listLoadBalancerCallForEmptyLB},
+			wantError:                false,
+			wantValue: `
+{
+ "id":"app/tcpudp-protocol",
+ "resources":{
+    "AWS::ElasticLoadBalancingV2::Listener":{
+       "80":{
+          "spec":{
+             "loadBalancerARN":{
+                "$ref":"#/resources/AWS::ElasticLoadBalancingV2::LoadBalancer/LoadBalancer/status/loadBalancerARN"
+             },
+             "port":80,
+             "protocol":"TCP_UDP",
+             "defaultActions":[
+                {
+                   "type":"forward",
+                   "forwardConfig":{
+                      "targetGroups":[
+                         {
+                            "targetGroupARN":{
+                               "$ref":"#/resources/AWS::ElasticLoadBalancingV2::TargetGroup/app/tcpudp-protocol:80/status/targetGroupARN"
+                            }
+                         }
+                      ]
+                   }
+                }
+             ]
+          }
+       },
+       "83":{
+          "spec":{
+             "loadBalancerARN":{
+                "$ref":"#/resources/AWS::ElasticLoadBalancingV2::LoadBalancer/LoadBalancer/status/loadBalancerARN"
+             },
+             "port":83,
+             "protocol":"TCP",
+             "defaultActions":[
+                {
+                   "type":"forward",
+                   "forwardConfig":{
+                      "targetGroups":[
+                         {
+                            "targetGroupARN":{
+                               "$ref":"#/resources/AWS::ElasticLoadBalancingV2::TargetGroup/app/tcpudp-protocol:83/status/targetGroupARN"
+                            }
+                         }
+                      ]
+                   }
+                }
+             ]
+          }
+       }
+    },
+    "AWS::ElasticLoadBalancingV2::LoadBalancer":{
+       "LoadBalancer":{
+          "spec":{
+             "name":"k8s-app-tcpudppr-2af705447d",
+             "type":"network",
+             "scheme":"internet-facing",
+             "ipAddressType":"ipv4",
+             "subnetMapping":[
+                {
+                   "subnetID":"subnet-1"
+                },
+                {
+                   "subnetID":"subnet-2"
+                },
+                {
+                   "subnetID":"subnet-3"
+                }
+             ]
+          }
+       }
+    },
+    "AWS::ElasticLoadBalancingV2::TargetGroup":{
+       "app/tcpudp-protocol:80":{
+          "spec":{
+             "ipAddressType":"ipv4",
+             "name":"k8s-app-tcpudppr-2213a0d759",
+             "targetType":"instance",
+             "port":31223,
+             "protocol":"TCP_UDP",
+             "healthCheckConfig":{
+                "port":"traffic-port",
+                "protocol":"TCP",
+                "unhealthyThresholdCount":3,
+                "healthyThresholdCount":3,
+                "intervalSeconds":10
+             },
+             "targetGroupAttributes":[
+                {
+                   "key":"proxy_protocol_v2.enabled",
+                   "value":"false"
+                }
+             ]
+          }
+       },
+       "app/tcpudp-protocol:83":{
+          "spec":{
+             "ipAddressType":"ipv4",
+             "name":"k8s-app-tcpudppr-c200165858",
+             "targetType":"instance",
+             "port":32323,
+             "protocol":"TCP",
+             "healthCheckConfig":{
+                "port":"traffic-port",
+                "protocol":"TCP",
+                "unhealthyThresholdCount":3,
+                "healthyThresholdCount":3,
+                "intervalSeconds":10
+             },
+             "targetGroupAttributes":[
+                {
+                   "key":"proxy_protocol_v2.enabled",
+                   "value":"false"
+                }
+             ]
+          }
+       }
+    },
+    "K8S::ElasticLoadBalancingV2::TargetGroupBinding":{
+       "app/tcpudp-protocol:80":{
+          "spec":{
+             "template":{
+                "metadata":{
+                   "creationTimestamp":null,
+                   "name":"k8s-app-tcpudppr-2213a0d759",
+                   "namespace":"app"
+                },
+                "spec":{
+                   "targetGroupARN":{
+                      "$ref":"#/resources/AWS::ElasticLoadBalancingV2::TargetGroup/app/tcpudp-protocol:80/status/targetGroupARN"
+                   },
+                   "targetType":"instance",
+                   "serviceRef":{
+                      "name":"tcpudp-protocol",
+                      "port":80
+                   },
+                   "ipAddressType": "ipv4",
+                   "networking":{
+                      "ingress":[
+                         {
+                            "from":[
+                               {
+                                  "ipBlock":{
+                                     "cidr":"0.0.0.0/0"
+                                  }
+                               }
+                            ],
+                            "ports":[
+                               {
+                                  "protocol":"TCP",
+                                  "port":31223
+                               },
+                               {
+                                  "protocol":"UDP",
+                                  "port":31223
+                               }
+                            ]
+                         }
+                      ]
+                   }
+                }
+             }
+          }
+       },
+       "app/tcpudp-protocol:83":{
+          "spec":{
+             "template":{
+                "metadata":{
+                   "name":"k8s-app-tcpudppr-c200165858",
+                   "namespace":"app",
+                   "creationTimestamp":null
+                },
+                "spec":{
+                   "targetGroupARN":{
+                      "$ref":"#/resources/AWS::ElasticLoadBalancingV2::TargetGroup/app/tcpudp-protocol:83/status/targetGroupARN"
+                   },
+                   "targetType":"instance",
+                   "serviceRef":{
+                      "name":"tcpudp-protocol",
+                      "port":83
+                   },
+                   "ipAddressType": "ipv4",
+                   "networking":{
+                      "ingress":[
+                         {
+                            "from":[
+                               {
+                                  "ipBlock":{
+                                     "cidr":"0.0.0.0/0"
+                                  }
+                               }
+                            ],
+                            "ports":[
+                               {
+                                  "protocol":"TCP",
+                                  "port":32323
+                               }
+                            ]
+                         }
+                      ]
+                   }
+                }
+             }
+          }
+       }
+    }
+ }
+}
+`,
+
+			wantNumResources: 7,
+		},
 		{
 			testName: "Simple service",
 			svc: &corev1.Service{
